@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅行日志 - 云途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --primary-hover: #1557b0;
+            --secondary-color: #00c853;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-light: #999999;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --radius: 8px;
+            --radius-lg: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            height: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-logo i {
+            font-size: 28px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background: rgba(26, 115, 232, 0.08);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active .nav-link {
+            background: rgba(26, 115, 232, 0.12);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-login {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu.hidden {
+            display: none;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-color);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-menu-trigger:hover {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .user-menu-trigger span {
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-menu-trigger .fa-chevron-down {
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .user-menu:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 180px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-hover);
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1001;
+        }
+
+        .user-menu:hover .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-color);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 8px 0;
+        }
+
+        .dropdown-item.logout {
+            color: #e53935;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(229, 57, 53, 0.08);
+        }
+
+        .main-content {
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+        }
+
+        .main-content-area {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .travelog-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .travelog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .travelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .travelog-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .travelog-date i {
+            color: var(--primary-color);
+        }
+
+        .travelog-location {
+            color: var(--text-secondary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .travelog-location i {
+            color: #ff6b6b;
+        }
+
+        .travelog-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+        }
+
+        .travelog-text {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .travelog-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .travelog-img {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%);
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 24px;
+            overflow: hidden;
+        }
+
+        .travelog-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .travelog-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        .btn-secondary i {
+            color: #ff6b6b;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-title i {
+            color: var(--primary-color);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: var(--bg-color);
+            border-radius: var(--radius);
+        }
+
+        .stat-num {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .recommendation-item {
+            display: flex;
+            gap: 12px;
+            padding: 15px;
+            border-radius: var(--radius);
+            background: var(--bg-color);
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .recommendation-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .recommendation-item:hover {
+            background: #e8eaed;
+            transform: translateX(5px);
+        }
+
+        .recommendation-img {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius);
+            background: linear-gradient(135deg, #e0e0e0 0%, #f0f0f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .recommendation-info h4 {
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .recommendation-info p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .generate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #00a843 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: var(--bg-color);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 14px;
+            font-family: inherit;
+            transition: var(--transition);
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .image-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .image-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(26, 115, 232, 0.05);
+        }
+
+        .image-upload i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .image-upload p {
+            color: var(--text-secondary);
+        }
+
+        .image-preview-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .image-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        .biography-content {
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .biography-content h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .biography-content h3 {
+            color: var(--text-primary);
+            margin: 20px 0 15px 0;
+        }
+
+        .biography-content ul {
+            margin-bottom: 15px;
+            padding-left: 20px;
+            list-style: disc;
+        }
+
+        .biography-content li {
+            margin-bottom: 8px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .page-title-wrapper {
+                flex-direction: column;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .travelog-images {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="计设.html" class="nav-logo">
+                <i class="fas fa-plane-departure"></i>
+                <span>云途</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="计设.html#home" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>主页</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#plan" class="nav-link">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>官方规划</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#ai" class="nav-link">
+                        <i class="fas fa-robot"></i>
+                        <span>AI助手</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#community" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>社区</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="计设.html#profile" class="nav-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="nav-actions">
+                <button class="btn-login" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录 / 注册</span>
+                </button>
+                <div class="user-menu hidden" id="userMenu">
+                    <div class="user-menu-trigger">
+                        <div class="user-avatar-small" id="navAvatar">
+                            <img src="" alt="" id="navAvatarImg" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <i class="fas fa-user" id="navAvatarIcon"></i>
+                        </div>
+                        <span id="username">旅行者</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="user-dropdown">
+                        <a href="计设.html#profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i> 个人中心
+                        </a>
+                        <a href="计设.html#profile" class="dropdown-item" data-tab="settings">
+                            <i class="fas fa-cog"></i> 账号设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item logout" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title-wrapper">
+                    <a href="计设.html#profile" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回个人中心</span>
+                    </a>
+                    <h1 class="page-title">我的旅行日志</h1>
+                    <p class="page-subtitle">记录每一次美好的旅程</p>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-secondary" onclick="openFootprintModal()">
+                        <i class="fas fa-map-marked-alt"></i> 我的足迹
+                    </button>
+                    <button class="btn-primary" onclick="openCreateModal()">
+                        <i class="fas fa-pen"></i> 发布日志
+                    </button>
+                </div>
+            </div>
+
+            <div class="content-grid">
+                <div class="main-content-area" id="travelogList">
+                    <div class="travelog-card fade-in">
+                        <div class="travelog-header">
+                            <span class="travelog-date">
+                                <i class="fas fa-calendar"></i> 2024-03-15
+                            </span>
+                            <span class="travelog-location">
+                                <i class="fas fa-map-marker-alt"></i> 杭州
+                            </span>
+                        </div>
+                        <h3 class="travelog-title">西湖之旅</h3>
+                        <p class="travelog-text">今天游览了西湖，景色美不胜收，特别是断桥残雪的景点，让人流连忘返。湖边的柳树随风摇曳，远山如黛，近水如镜，真是一幅天然的水墨画卷。漫步在苏堤上，感受着江南水乡的独特韵味，每一处风景都让人心旷神怡。</p>
+                        <div class="travelog-images">
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                        </div>
+                        <div class="travelog-actions">
+                            <button class="btn-secondary"><i class="fas fa-heart"></i> 点赞</button>
+                            <button class="btn-secondary"><i class="fas fa-comment"></i> 评论</button>
+                            <button class="btn-secondary"><i class="fas fa-share"></i> 分享</button>
+                            <button class="btn-secondary"><i class="fas fa-edit"></i> 编辑</button>
+                        </div>
+                    </div>
+
+                    <div class="travelog-card fade-in">
+                        <div class="travelog-header">
+                            <span class="travelog-date">
+                                <i class="fas fa-calendar"></i> 2024-01-20
+                            </span>
+                            <span class="travelog-location">
+                                <i class="fas fa-map-marker-alt"></i> 哈尔滨
+                            </span>
+                        </div>
+                        <h3 class="travelog-title">冰雪大世界</h3>
+                        <p class="travelog-text">冰雪大世界真的太壮观了，各种冰雕栩栩如生，夜晚的灯光秀更是精彩。每一座冰雕都凝聚了艺术家的心血，在灯光的映衬下，仿佛置身于童话世界。零下二十度的寒冷也挡不住我对冰雪世界的热爱，这是一次难忘的北国之旅。</p>
+                        <div class="travelog-images">
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                        </div>
+                        <div class="travelog-actions">
+                            <button class="btn-secondary"><i class="fas fa-heart"></i> 点赞</button>
+                            <button class="btn-secondary"><i class="fas fa-comment"></i> 评论</button>
+                            <button class="btn-secondary"><i class="fas fa-share"></i> 分享</button>
+                            <button class="btn-secondary"><i class="fas fa-edit"></i> 编辑</button>
+                        </div>
+                    </div>
+
+                    <div class="travelog-card fade-in">
+                        <div class="travelog-header">
+                            <span class="travelog-date">
+                                <i class="fas fa-calendar"></i> 2023-10-05
+                            </span>
+                            <span class="travelog-location">
+                                <i class="fas fa-map-marker-alt"></i> 成都
+                            </span>
+                        </div>
+                        <h3 class="travelog-title">美食之都的探索</h3>
+                        <p class="travelog-text">成都真的是美食天堂！火锅、串串、担担面、龙抄手……吃得根本停不下来！大熊猫基地也超可爱，那些圆滚滚的国宝们懒洋洋地吃着竹子，萌化了所有人的心。宽窄巷子的老成都风情，锦里的热闹繁华，都让我深深爱上了这座城市。</p>
+                        <div class="travelog-images">
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                            <div class="travelog-img"><i class="fas fa-image"></i></div>
+                        </div>
+                        <div class="travelog-actions">
+                            <button class="btn-secondary"><i class="fas fa-heart"></i> 点赞</button>
+                            <button class="btn-secondary"><i class="fas fa-comment"></i> 评论</button>
+                            <button class="btn-secondary"><i class="fas fa-share"></i> 分享</button>
+                            <button class="btn-secondary"><i class="fas fa-edit"></i> 编辑</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-chart-bar"></i> 我的足迹</h3>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-num">3</div>
+                                <div class="stat-label">日志</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-num">3</div>
+                                <div class="stat-label">城市</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-num">128</div>
+                                <div class="stat-label">获赞</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-num">45</div>
+                                <div class="stat-label">评论</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-lightbulb"></i> 智能推荐</h3>
+                        <div class="recommendation-item">
+                            <div class="recommendation-img"><i class="fas fa-mountain"></i></div>
+                            <div class="recommendation-info">
+                                <h4>千岛湖</h4>
+                                <p>根据您在杭州的足迹推荐</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-item">
+                            <div class="recommendation-img"><i class="fas fa-snowflake"></i></div>
+                            <div class="recommendation-info">
+                                <h4>亚布力滑雪场</h4>
+                                <p>根据您在哈尔滨的足迹推荐</p>
+                            </div>
+                        </div>
+                        <div class="recommendation-item">
+                            <div class="recommendation-img"><i class="fas fa-leaf"></i></div>
+                            <div class="recommendation-info">
+                                <h4>九寨沟</h4>
+                                <p>根据您在成都的足迹推荐</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-magic"></i> 生成个人小传</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 15px; font-size: 14px;">根据您的旅行日志，自动生成专属的个人旅行小传</p>
+                        <button class="generate-btn" onclick="generateBiography()">
+                            <i class="fas fa-wand-magic-sparkles"></i> 生成我的旅行小传
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="createModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>发布旅行日志</h3>
+                <button class="modal-close" onclick="closeCreateModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>日志标题</label>
+                    <input type="text" id="logTitle" placeholder="给您的旅行起个标题">
+                </div>
+                <div class="form-group">
+                    <label>旅行地点</label>
+                    <input type="text" id="logLocation" placeholder="您去了哪里？">
+                </div>
+                <div class="form-group">
+                    <label>旅行日期</label>
+                    <input type="date" id="logDate">
+                </div>
+                <div class="form-group">
+                    <label>日志内容</label>
+                    <textarea id="logContent" placeholder="分享您的旅行故事..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>上传图片</label>
+                    <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>点击或拖拽上传图片</p>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/*" multiple style="display: none;">
+                    <div class="image-preview-container" id="imagePreviewContainer"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeCreateModal()">取消</button>
+                <button class="btn-primary" onclick="submitLog()">
+                    <i class="fas fa-paper-plane"></i> 发布
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="footprintModal">
+        <div class="modal-container" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>我的旅行足迹</h3>
+                <button class="modal-close" onclick="closeFootprintModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" style="padding: 0; overflow: hidden;">
+                <div style="position: relative; width: 100%; height: 500px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <canvas id="footprintCanvas" style="width: 100%; height: 100%;"></canvas>
+                    <div id="cityTooltip" style="position: absolute; display: none; padding: 8px 12px; background: rgba(0, 0, 0, 0.8); color: white; border-radius: 6px; font-size: 14px; pointer-events: none; z-index: 10;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <div style="flex: 1; display: flex; gap: 20px; align-items: center;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255, 255, 255, 0.3);"></div>
+                        <span style="font-size: 13px; color: var(--text-secondary);">未到访</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <div style="width: 16px; height: 16px; border-radius: 50%; background: rgba(255, 107, 107, 0.8);"></div>
+                        <span style="font-size: 13px; color: var(--text-secondary);">已到访</span>
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="closeFootprintModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="biographyModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h3>我的旅行小传</h3>
+                <button class="modal-close" onclick="closeBiographyModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="biographyContent">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeBiographyModal()">关闭</button>
+                <button class="btn-primary" onclick="shareBiography()">
+                    <i class="fas fa-share"></i> 分享
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedImages = [];
+
+        function openCreateModal() {
+            document.getElementById('createModal').classList.add('active');
+            document.getElementById('logDate').valueAsDate = new Date();
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createModal').classList.remove('active');
+            document.getElementById('logTitle').value = '';
+            document.getElementById('logLocation').value = '';
+            document.getElementById('logContent').value = '';
+            document.getElementById('imagePreviewContainer').innerHTML = '';
+            uploadedImages = [];
+        }
+
+        function submitLog() {
+            const title = document.getElementById('logTitle').value;
+            const location = document.getElementById('logLocation').value;
+            const date = document.getElementById('logDate').value;
+            const content = document.getElementById('logContent').value;
+
+            if (!title || !location || !content) {
+                alert('请填写所有必填项');
+                return;
+            }
+
+            const newCard = document.createElement('div');
+            newCard.className = 'travelog-card fade-in';
+            newCard.innerHTML = `
+                <div class="travelog-header">
+                    <span class="travelog-date">
+                        <i class="fas fa-calendar"></i> ${date}
+                    </span>
+                    <span class="travelog-location">
+                        <i class="fas fa-map-marker-alt"></i> ${location}
+                    </span>
+                </div>
+                <h3 class="travelog-title">${title}</h3>
+                <p class="travelog-text">${content}</p>
+                ${uploadedImages.length > 0 ? `
+                <div class="travelog-images">
+                    ${uploadedImages.map(() => '<div class="travelog-img"><i class="fas fa-image"></i></div>').join('')}
+                </div>
+                ` : ''}
+                <div class="travelog-actions">
+                    <button class="btn-secondary"><i class="fas fa-heart"></i> 点赞</button>
+                    <button class="btn-secondary"><i class="fas fa-comment"></i> 评论</button>
+                    <button class="btn-secondary"><i class="fas fa-share"></i> 分享</button>
+                    <button class="btn-secondary"><i class="fas fa-edit"></i> 编辑</button>
+                </div>
+            `;
+
+            const travelogList = document.getElementById('travelogList');
+            travelogList.insertBefore(newCard, travelogList.firstChild);
+
+            alert('日志发布成功！');
+            closeCreateModal();
+            updateStats();
+        }
+
+        function generateBiography() {
+            const content = `
+                <div class="biography-content">
+                    <h2><i class="fas fa-plane"></i> 我的旅行故事</h2>
+                    <p>作为一名热爱旅行的探索者，我的足迹遍布祖国的大江南北。从江南水乡的温婉，到北国冰城的壮丽，每一次旅行都让我收获满满。</p>
+                    
+                    <h3><i class="fas fa-map-marker-alt"></i> 旅行足迹</h3>
+                    <ul>
+                        <li><strong>杭州西湖：</strong>感受江南水乡的诗意画境，漫步苏堤，品味断桥残雪的浪漫</li>
+                        <li><strong>哈尔滨冰雪：</strong>体验北国风光的冰雪奇缘，在冰雕世界中感受童话般的美丽</li>
+                        <li><strong>成都美食：</strong>探索美食之都的味蕾盛宴，与国宝大熊猫的亲密接触</li>
+                    </ul>
+                    
+                    <h3><i class="fas fa-heart"></i> 旅行感悟</h3>
+                    <p>旅行不仅仅是看风景，更是一种生活态度。在旅途中，我学会了独立、包容和感恩。每一次出发都是一次新的冒险，每一次归来都是一次成长。</p>
+                    
+                    <h3><i class="fas fa-compass"></i> 未来计划</h3>
+                    <p>我的旅行之路还在继续，期待探索更多未知的风景，结识更多志同道合的朋友，让生活因旅行而更加精彩。下一站，也许是千岛湖的碧波，也许是九寨沟的彩林...</p>
+                    
+                    <div style="text-align: center; margin-top: 30px; padding: 20px; background: var(--bg-color); border-radius: var(--radius);">
+                        <p style="color: var(--primary-color); font-weight: 500; font-size: 16px;">
+                            <i class="fas fa-quote-left"></i>
+                            世界那么大，我想去看看
+                            <i class="fas fa-quote-right"></i>
+                        </p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('biographyContent').innerHTML = content;
+            document.getElementById('biographyModal').classList.add('active');
+        }
+
+        function closeBiographyModal() {
+            document.getElementById('biographyModal').classList.remove('active');
+        }
+
+        function openFootprintModal() {
+            document.getElementById('footprintModal').classList.add('active');
+            setTimeout(initFootprintMap, 100);
+        }
+
+        function closeFootprintModal() {
+            document.getElementById('footprintModal').classList.remove('active');
+        }
+
+        let footprintCanvas, footprintCtx, particles = [];
+        let animationId;
+
+        function initFootprintMap() {
+            footprintCanvas = document.getElementById('footprintCanvas');
+            footprintCtx = footprintCanvas.getContext('2d');
+            
+            const container = footprintCanvas.parentElement;
+            footprintCanvas.width = container.offsetWidth;
+            footprintCanvas.height = container.offsetHeight;
+
+            particles = [];
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+
+            createParticles();
+            animateParticles();
+
+            footprintCanvas.addEventListener('mousemove', handleParticleHover);
+            footprintCanvas.addEventListener('mouseleave', hideTooltip);
+        }
+
+        function createParticles() {
+            const visitedCities = getVisitedCities();
+            const particleCount = 1200;
+            const centerX = footprintCanvas.width / 2;
+            const centerY = footprintCanvas.height / 2;
+            const scale = Math.min(footprintCanvas.width, footprintCanvas.height) / 1200;
+
+            particles = [];
+            
+            for (let i = 0; i < particleCount; i++) {
+                let x, y;
+                let attempts = 0;
+                const maxAttempts = 50;
+                
+                do {
+                    x = centerX + (Math.random() - 0.5) * 900 * scale;
+                    y = centerY + (Math.random() - 0.5) * 700 * scale;
+                    attempts++;
+                } while (!isPointInChinaMap(x, y, centerX, centerY, scale) && attempts < maxAttempts);
+                
+                if (attempts < maxAttempts) {
+                    const isVisited = isPointInVisitedCity(x, y, visitedCities, centerX, centerY, scale);
+                    
+                    particles.push({
+                        x: x,
+                        y: y,
+                        baseX: x,
+                        baseY: y,
+                        size: Math.random() * 2.5 + 0.5,
+                        opacity: isVisited ? 0.8 : 0.3,
+                        color: isVisited ? 'rgba(255, 107, 107,' : 'rgba(255, 255, 255,',
+                        speedX: (Math.random() - 0.5) * 0.3,
+                        speedY: (Math.random() - 0.5) * 0.3,
+                        isVisited: isVisited
+                    });
+                }
+            }
+        }
+
+        function isPointInChinaMap(x, y, centerX, centerY, scale) {
+            const relX = (x - centerX) / scale;
+            const relY = (y - centerY) / scale;
+            
+            const chinaBorderPoints = [
+                {x: -400, y: -300}, {x: -350, y: -320}, {x: -300, y: -330}, {x: -250, y: -320}, {x: -200, y: -300},
+                {x: -150, y: -310}, {x: -100, y: -320}, {x: -50, y: -310}, {x: 0, y: -300}, {x: 50, y: -310},
+                {x: 100, y: -320}, {x: 150, y: -310}, {x: 200, y: -300}, {x: 250, y: -280}, {x: 300, y: -250},
+                {x: 350, y: -220}, {x: 400, y: -180}, {x: 420, y: -150}, {x: 430, y: -100}, {x: 420, y: -50},
+                {x: 400, y: 0}, {x: 380, y: 50}, {x: 360, y: 100}, {x: 340, y: 150}, {x: 320, y: 200},
+                {x: 300, y: 250}, {x: 250, y: 280}, {x: 200, y: 300}, {x: 150, y: 310}, {x: 100, y: 310},
+                {x: 50, y: 300}, {x: 0, y: 290}, {x: -50, y: 280}, {x: -100, y: 260}, {x: -150, y: 240},
+                {x: -200, y: 220}, {x: -250, y: 200}, {x: -300, y: 180}, {x: -350, y: 150}, {x: -400, y: 120},
+                {x: -450, y: 80}, {x: -480, y: 40}, {x: -490, y: 0}, {x: -480, y: -50}, {x: -450, y: -100},
+                {x: -430, y: -150}, {x: -410, y: -200}, {x: -400, y: -250}, {x: -400, y: -300}
+            ];
+            
+            return pointInPolygon({x: relX, y: relY}, chinaBorderPoints);
+        }
+
+        function pointInPolygon(point, polygon) {
+            let inside = false;
+            for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+                const xi = polygon[i].x, yi = polygon[i].y;
+                const xj = polygon[j].x, yj = polygon[j].y;
+                const intersect = ((yi > point.y) != (yj > point.y))
+                    && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+                if (intersect) inside = !inside;
+            }
+            return inside;
+        }
+
+        function getVisitedCities() {
+            const cards = document.querySelectorAll('.travelog-card');
+            const cities = [];
+            
+            cards.forEach(card => {
+                const location = card.querySelector('.travelog-location');
+                if (location) {
+                    const cityText = location.textContent.trim().replace(/.*\s*/, '');
+                    cities.push(cityText);
+                }
+            });
+
+            return cities;
+        }
+
+        function isPointInVisitedCity(x, y, visitedCities, centerX, centerY, scale) {
+            const cityPositions = {
+                '北京': { x: 300, y: -200, radius: 40 },
+                '上海': { x: 380, y: 0, radius: 35 },
+                '杭州': { x: 360, y: 20, radius: 30 },
+                '南京': { x: 340, y: -20, radius: 30 },
+                '西安': { x: 200, y: -10, radius: 35 },
+                '成都': { x: 120, y: 40, radius: 35 },
+                '哈尔滨': { x: 420, y: -250, radius: 40 },
+                '金华': { x: 370, y: 30, radius: 25 },
+                '广州': { x: 280, y: 180, radius: 35 },
+                '深圳': { x: 290, y: 200, radius: 30 },
+                '重庆': { x: 150, y: 60, radius: 35 },
+                '武汉': { x: 280, y: 0, radius: 30 },
+                '天津': { x: 320, y: -180, radius: 30 },
+                '青岛': { x: 360, y: -120, radius: 30 },
+                '大连': { x: 400, y: -180, radius: 30 },
+                '厦门': { x: 320, y: 140, radius: 25 },
+                '长沙': { x: 260, y: 60, radius: 30 },
+                '昆明': { x: 80, y: 140, radius: 30 },
+                '贵阳': { x: 160, y: 100, radius: 28 },
+                '兰州': { x: 160, y: -80, radius: 28 },
+                '乌鲁木齐': { x: -200, y: -120, radius: 35 },
+                '拉萨': { x: -120, y: 0, radius: 30 },
+                '呼和浩特': { x: 240, y: -220, radius: 30 },
+                '沈阳': { x: 410, y: -200, radius: 32 },
+                '长春': { x: 420, y: -230, radius: 32 },
+                '苏州': { x: 370, y: -10, radius: 28 },
+                '宁波': { x: 380, y: 40, radius: 28 },
+                '合肥': { x: 320, y: -10, radius: 28 },
+                '福州': { x: 310, y: 120, radius: 28 },
+                '南昌': { x: 290, y: 40, radius: 28 },
+                '郑州': { x: 260, y: -20, radius: 30 },
+                '石家庄': { x: 300, y: -160, radius: 28 },
+                '太原': { x: 240, y: -80, radius: 28 },
+                '济南': { x: 340, y: -80, radius: 28 },
+                '南宁': { x: 200, y: 160, radius: 30 },
+                '海口': { x: 180, y: 240, radius: 25 }
+            };
+
+            for (const city of visitedCities) {
+                const pos = cityPositions[city];
+                if (pos) {
+                    const cityX = centerX + pos.x * scale;
+                    const cityY = centerY + pos.y * scale;
+                    const distance = Math.sqrt((x - cityX) ** 2 + (y - cityY) ** 2);
+                    
+                    if (distance < pos.radius * scale) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function animateParticles() {
+            footprintCtx.clearRect(0, 0, footprintCanvas.width, footprintCanvas.height);
+
+            particles.forEach(particle => {
+                particle.x += particle.speedX;
+                particle.y += particle.speedY;
+
+                const distanceFromBase = Math.sqrt(
+                    (particle.x - particle.baseX) ** 2 + 
+                    (particle.y - particle.baseY) ** 2
+                );
+
+                if (distanceFromBase > 20) {
+                    particle.speedX *= -1;
+                    particle.speedY *= -1;
+                }
+
+                footprintCtx.beginPath();
+                footprintCtx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+                footprintCtx.fillStyle = particle.color + particle.opacity + ')';
+                footprintCtx.fill();
+
+                if (particle.isVisited) {
+                    footprintCtx.shadowBlur = 10;
+                    footprintCtx.shadowColor = 'rgba(255, 107, 107, 0.5)';
+                }
+            });
+
+            footprintCtx.shadowBlur = 0;
+            animationId = requestAnimationFrame(animateParticles);
+        }
+
+        function handleParticleHover(e) {
+            const rect = footprintCanvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const cityPositions = {
+                '北京': { x: 300, y: -200, radius: 40 },
+                '上海': { x: 380, y: 0, radius: 35 },
+                '杭州': { x: 360, y: 20, radius: 30 },
+                '南京': { x: 340, y: -20, radius: 30 },
+                '西安': { x: 200, y: -10, radius: 35 },
+                '成都': { x: 120, y: 40, radius: 35 },
+                '哈尔滨': { x: 420, y: -250, radius: 40 },
+                '金华': { x: 370, y: 30, radius: 25 },
+                '广州': { x: 280, y: 180, radius: 35 },
+                '深圳': { x: 290, y: 200, radius: 30 },
+                '重庆': { x: 150, y: 60, radius: 35 },
+                '武汉': { x: 280, y: 0, radius: 30 },
+                '天津': { x: 320, y: -180, radius: 30 },
+                '青岛': { x: 360, y: -120, radius: 30 },
+                '大连': { x: 400, y: -180, radius: 30 },
+                '厦门': { x: 320, y: 140, radius: 25 },
+                '长沙': { x: 260, y: 60, radius: 30 },
+                '昆明': { x: 80, y: 140, radius: 30 },
+                '贵阳': { x: 160, y: 100, radius: 28 },
+                '兰州': { x: 160, y: -80, radius: 28 },
+                '乌鲁木齐': { x: -200, y: -120, radius: 35 },
+                '拉萨': { x: -120, y: 0, radius: 30 },
+                '呼和浩特': { x: 240, y: -220, radius: 30 },
+                '沈阳': { x: 410, y: -200, radius: 32 },
+                '长春': { x: 420, y: -230, radius: 32 },
+                '苏州': { x: 370, y: -10, radius: 28 },
+                '宁波': { x: 380, y: 40, radius: 28 },
+                '合肥': { x: 320, y: -10, radius: 28 },
+                '福州': { x: 310, y: 120, radius: 28 },
+                '南昌': { x: 290, y: 40, radius: 28 },
+                '郑州': { x: 260, y: -20, radius: 30 },
+                '石家庄': { x: 300, y: -160, radius: 28 },
+                '太原': { x: 240, y: -80, radius: 28 },
+                '济南': { x: 340, y: -80, radius: 28 },
+                '南宁': { x: 200, y: 160, radius: 30 },
+                '海口': { x: 180, y: 240, radius: 25 }
+            };
+
+            const centerX = footprintCanvas.width / 2;
+            const centerY = footprintCanvas.height / 2;
+            const scale = Math.min(footprintCanvas.width, footprintCanvas.height) / 1200;
+
+            for (const [city, pos] of Object.entries(cityPositions)) {
+                const cityX = centerX + pos.x * scale;
+                const cityY = centerY + pos.y * scale;
+                const distance = Math.sqrt((x - cityX) ** 2 + (y - cityY) ** 2);
+                
+                if (distance < pos.radius * scale) {
+                    showTooltip(e.clientX, e.clientY, city);
+                    return;
+                }
+            }
+            hideTooltip();
+        }
+
+        function showTooltip(x, y, cityName) {
+            const tooltip = document.getElementById('cityTooltip');
+            const rect = footprintCanvas.getBoundingClientRect();
+            
+            let tooltipLeft = x - rect.left + 15;
+            let tooltipTop = y - rect.top - 10;
+            
+            const tooltipWidth = tooltip.offsetWidth || 100;
+            const tooltipHeight = tooltip.offsetHeight || 30;
+            
+            if (tooltipLeft + tooltipWidth > rect.width) {
+                tooltipLeft = x - rect.left - tooltipWidth - 15;
+            }
+            
+            if (tooltipTop < 0) {
+                tooltipTop = y - rect.top + 10;
+            }
+            
+            tooltip.style.left = tooltipLeft + 'px';
+            tooltip.style.top = tooltipTop + 'px';
+            tooltip.textContent = cityName;
+            tooltip.style.display = 'block';
+        }
+
+        function hideTooltip() {
+            document.getElementById('cityTooltip').style.display = 'none';
+        }
+
+        function shareBiography() {
+            alert('分享功能开发中，敬请期待！');
+        }
+
+        function updateStats() {
+            const cards = document.querySelectorAll('.travelog-card');
+            const cities = new Set();
+            cards.forEach(card => {
+                const location = card.querySelector('.travelog-location');
+                if (location) {
+                    cities.add(location.textContent.trim());
+                }
+            });
+            
+            document.querySelector('.stat-item:nth-child(1) .stat-num').textContent = cards.length;
+            document.querySelector('.stat-item:nth-child(2) .stat-num').textContent = cities.size;
+        }
+
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const files = e.target.files;
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        uploadedImages.push(e.target.result);
+                        
+                        const preview = document.createElement('div');
+                        preview.className = 'image-preview';
+                        preview.innerHTML = `
+                            <img src="${e.target.result}" alt="预览">
+                            <button class="remove-btn" onclick="removeImage(${uploadedImages.length - 1}, this)">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        `;
+                        previewContainer.appendChild(preview);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            }
+        });
+
+        function removeImage(index, btn) {
+            uploadedImages.splice(index, 1);
+            btn.parentElement.remove();
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // ==================== 点赞功能 ====================
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.travelog-actions .btn-secondary');
+            if (btn && btn.querySelector('.fa-heart')) {
+                // 检查是否已登录
+                const isLoggedIn = localStorage.getItem('isLoggedIn');
+                if (isLoggedIn !== 'true') {
+                    alert('请先登录');
+                    return;
+                }
+                
+                const icon = btn.querySelector('.fa-heart');
+                const travelogCard = btn.closest('.travelog-card');
+                
+                // 获取旅行日志ID和内容
+                let logId;
+                let logTitle;
+                let logLocation;
+                let logContent;
+                
+                if (travelogCard) {
+                    const titleEl = travelogCard.querySelector('.travelog-title');
+                    const locationEl = travelogCard.querySelector('.travelog-location');
+                    const contentEl = travelogCard.querySelector('.travelog-text');
+                    
+                    logTitle = titleEl ? titleEl.textContent : '未知标题';
+                    logLocation = locationEl ? locationEl.textContent.trim() : '';
+                    logContent = contentEl ? contentEl.textContent : '';
+                    
+                    // 根据标题生成唯一ID
+                    logId = 'log_' + logTitle.substring(0, 20).replace(/\s/g, '_');
+                } else {
+                    logId = 'log_' + Date.now();
+                }
+                
+                // 获取当前点赞状态
+                const likedLogs = JSON.parse(localStorage.getItem('travel_liked_logs') || '[]');
+                const isLiked = likedLogs.some(l => l.id === logId);
+                
+                if (isLiked) {
+                    // 取消点赞
+                    const updatedLikedLogs = likedLogs.filter(l => l.id !== logId);
+                    localStorage.setItem('travel_liked_logs', JSON.stringify(updatedLikedLogs));
+                    
+                    // 更新UI
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    icon.style.color = '';
+                    btn.innerHTML = `<i class="far fa-heart"></i> 点赞`;
+                    
+                    alert('已取消点赞');
+                    
+                    // 更新个人中心的喜欢列表
+                    updateFavoritesList();
+                } else {
+                    // 点赞
+                    const newLikedLog = {
+                        id: logId,
+                        title: logTitle,
+                        content: logContent,
+                        location: logLocation,
+                        type: 'travelog',
+                        likedAt: new Date().toISOString()
+                    };
+                    likedLogs.push(newLikedLog);
+                    localStorage.setItem('travel_liked_logs', JSON.stringify(likedLogs));
+                    
+                    // 更新UI
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    icon.style.color = '#ff4757';
+                    btn.innerHTML = `<i class="fas fa-heart" style="color: #ff4757;"></i> 点赞`;
+                    
+                    alert('点赞成功');
+                    
+                    // 更新个人中心的喜欢列表
+                    updateFavoritesList();
+                }
+            }
+        });
+
+        // 更新个人中心的喜欢列表
+        function updateFavoritesList() {
+            // 获取所有点赞的内容（文章和旅行日志）
+            const likedPosts = JSON.parse(localStorage.getItem('travel_liked_posts') || '[]');
+            const likedLogs = JSON.parse(localStorage.getItem('travel_liked_logs') || '[]');
+            
+            // 合并所有喜欢的内容
+            const allLiked = [...likedPosts, ...likedLogs];
+            
+            // 更新localStorage中的总喜欢列表
+            localStorage.setItem('travel_all_liked', JSON.stringify(allLiked));
+        }
+
+        // 恢复点赞状态
+        function restoreLikeStatus() {
+            const likedLogs = JSON.parse(localStorage.getItem('travel_liked_logs') || '[]');
+            const travelogCards = document.querySelectorAll('.travelog-card');
+            
+            travelogCards.forEach(card => {
+                const titleEl = card.querySelector('.travelog-title');
+                if (!titleEl) return;
+                
+                const title = titleEl.textContent;
+                const logId = 'log_' + title.substring(0, 20).replace(/\s/g, '_');
+                
+                const likedLog = likedLogs.find(l => l.id === logId);
+                const actionBtn = card.querySelector('.travelog-actions .btn-secondary');
+                const icon = actionBtn?.querySelector('.fa-heart');
+                
+                if (likedLog && icon && actionBtn) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    icon.style.color = '#ff4757';
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn === 'true' && username) {
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('userMenu').classList.remove('hidden');
+                document.getElementById('username').textContent = username;
+            }
+
+            // 恢复点赞状态
+            restoreLikeStatus();
+
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                location.reload();
+            });
+        });
+    </script>
+</body>
+</html>
