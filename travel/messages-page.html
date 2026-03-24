@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人私信 - 云途</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #1a73e8;
+            --primary-hover: #1557b0;
+            --secondary-color: #00c853;
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --text-light: #999999;
+            --border-color: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+            --radius: 8px;
+            --radius-lg: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: var(--card-bg);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            height: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .nav-logo i {
+            font-size: 28px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover {
+            background: rgba(26, 115, 232, 0.08);
+            color: var(--primary-color);
+        }
+
+        .nav-item.active .nav-link {
+            background: rgba(26, 115, 232, 0.12);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-login {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 24px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .btn-login:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-menu.hidden {
+            display: none;
+        }
+
+        .user-menu-trigger {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: var(--bg-color);
+            border-radius: 24px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .user-menu-trigger:hover {
+            background: rgba(26, 115, 232, 0.1);
+        }
+
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            overflow: hidden;
+        }
+
+        .user-menu-trigger span {
+            font-size: 14px;
+            font-weight: 500;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-menu-trigger .fa-chevron-down {
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .user-menu:hover .fa-chevron-down {
+            transform: rotate(180deg);
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 180px;
+            background: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-hover);
+            padding: 8px 0;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: var(--transition);
+            z-index: 1001;
+        }
+
+        .user-menu:hover .user-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-color);
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border-color);
+            margin: 8px 0;
+        }
+
+        .dropdown-item.logout {
+            color: #e53935;
+        }
+
+        .dropdown-item.logout:hover {
+            background: rgba(229, 57, 53, 0.08);
+        }
+
+        .main-content {
+            margin-top: 64px;
+            min-height: calc(100vh - 64px);
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-title-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 30px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-title i {
+            color: var(--primary-color);
+        }
+
+        .contact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .contact-item:hover {
+            background: var(--bg-color);
+        }
+
+        .contact-item.active {
+            background: rgba(26, 115, 232, 0.1);
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .contact-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .contact-name {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .contact-last-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .contact-time {
+            font-size: 12px;
+            color: var(--text-light);
+            flex-shrink: 0;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: #ff6b6b;
+            color: white;
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+        }
+
+        .main-content-area {
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #f8f9fa;
+        }
+
+        .chat-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .chat-status {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .chat-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-action-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .chat-action-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .message.own {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-hover));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            max-width: 70%;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .message:not(.own) .message-bubble {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.own .message-bubble {
+            background: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.own .message-time {
+            text-align: left;
+        }
+
+        .chat-input-area {
+            padding: 20px;
+            border-top: 1px solid var(--border-color);
+            background: #f8f9fa;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+
+        .input-attachments {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .attachment-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: var(--transition);
+        }
+
+        .attachment-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .message-input {
+            flex: 1;
+            position: relative;
+        }
+
+        .message-input textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            min-height: 48px;
+            max-height: 120px;
+            transition: var(--transition);
+        }
+
+        .message-input textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .send-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        .btn-secondary {
+            background: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 10px 20px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .page-title-wrapper {
+                flex-direction: column;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .notification-item:hover {
+            background: var(--bg-color);
+        }
+
+        .notification-item.unread {
+            background: rgba(26, 115, 232, 0.05);
+        }
+
+        .notification-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c853, #00a843);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .notification-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .notification-message {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="计设.html" class="nav-logo">
+                <i class="fas fa-plane-departure"></i>
+                <span>云途</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="计设.html#home" class="nav-link">
+                        <i class="fas fa-home"></i>
+                        <span>主页</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#plan" class="nav-link">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>官方规划</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#ai" class="nav-link">
+                        <i class="fas fa-robot"></i>
+                        <span>AI助手</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="计设.html#community" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>社区</span>
+                    </a>
+                </li>
+                <li class="nav-item active">
+                    <a href="计设.html#profile" class="nav-link">
+                        <i class="fas fa-user-circle"></i>
+                        <span>个人中心</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="nav-actions">
+                <button class="btn-login" id="loginBtn">
+                    <i class="fas fa-user"></i>
+                    <span>登录 / 注册</span>
+                </button>
+                <div class="user-menu hidden" id="userMenu">
+                    <div class="user-menu-trigger">
+                        <div class="user-avatar-small" id="navAvatar">
+                            <img src="" alt="" id="navAvatarImg" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <i class="fas fa-user" id="navAvatarIcon"></i>
+                        </div>
+                        <span id="username">旅行者</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="user-dropdown">
+                        <a href="计设.html#profile" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i> 个人中心
+                        </a>
+                        <a href="计设.html#profile" class="dropdown-item" data-tab="settings">
+                            <i class="fas fa-cog"></i> 账号设置
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item logout" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i> 退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <div class="page-title-wrapper">
+                    <a href="计设.html#profile" class="back-link">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>返回个人中心</span>
+                    </a>
+                    <h1 class="page-title">个人私信</h1>
+                    <p class="page-subtitle">与好友和系统的消息对话</p>
+                </div>
+                <button class="btn-primary" onclick="openNewMessageModal()">
+                    <i class="fas fa-plus"></i> 新消息
+                </button>
+            </div>
+
+            <div class="content-grid">
+                <div class="sidebar">
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-search"></i> 搜索消息</h3>
+                        <div style="position: relative;">
+                            <input type="text" placeholder="搜索联系人或消息内容..." style="width: 100%; padding: 10px 40px 10px 16px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px;">
+                            <i class="fas fa-search" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light);"></i>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-card">
+                        <h3 class="sidebar-title"><i class="fas fa-address-book"></i> 联系人</h3>
+                        <div class="contact-list">
+                            <div class="contact-item active">
+                                <div class="contact-avatar">系</div>
+                                <div class="contact-info">
+                                    <div class="contact-name">系统通知</div>
+                                    <div class="contact-last-message">您的旅行计划已更新</div>
+                                </div>
+                                <div class="contact-time">10:30</div>
+                                <div class="unread-badge">1</div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-avatar">旅</div>
+                                <div class="contact-info">
+                                    <div class="contact-name">旅行助手</div>
+                                    <div class="contact-last-message">您预订的酒店已确认</div>
+                                </div>
+                                <div class="contact-time">昨天</div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-avatar">小</div>
+                                <div class="contact-info">
+                                    <div class="contact-name">好友小明</div>
+                                    <div class="contact-last-message">周末一起去杭州玩吗？</div>
+                                </div>
+                                <div class="contact-time">周一</div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-avatar">李</div>
+                                <div class="contact-info">
+                                    <div class="contact-name">旅行达人小李</div>
+                                    <div class="contact-last-message">推荐你去云南大理</div>
+                                </div>
+                                <div class="contact-time">上周</div>
+                            </div>
+                            <div class="contact-item">
+                                <div class="contact-avatar">张</div>
+                                <div class="contact-info">
+                                    <div class="contact-name">张三</div>
+                                    <div class="contact-last-message">下次旅行一起啊</div>
+                                </div>
+                                <div class="contact-time">2周前</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="main-content-area">
+                    <div class="chat-header">
+                        <div class="chat-avatar">系</div>
+                        <div class="chat-info">
+                            <div class="chat-name">系统通知</div>
+                            <div class="chat-status">在线</div>
+                        </div>
+                        <div class="chat-actions">
+                            <button class="chat-action-btn"><i class="fas fa-info-circle"></i></button>
+                            <button class="chat-action-btn"><i class="fas fa-phone"></i></button>
+                            <button class="chat-action-btn"><i class="fas fa-video"></i></button>
+                        </div>
+                    </div>
+
+                    <div class="chat-messages">
+                        <div class="message">
+                            <div class="message-avatar">系</div>
+                            <div class="message-content">
+                                <div class="message-bubble">
+                                    欢迎使用云途旅行助手！您的账户已成功创建，开始您的旅行计划吧。
+                                </div>
+                                <div class="message-time">2024-03-10 09:00</div>
+                            </div>
+                        </div>
+
+                        <div class="message own">
+                            <div class="message-avatar">我</div>
+                            <div class="message-content">
+                                <div class="message-bubble">
+                                    谢谢！我想了解一下杭州的旅游攻略。
+                                </div>
+                                <div class="message-time">2024-03-10 09:15</div>
+                            </div>
+                        </div>
+
+                        <div class="message">
+                            <div class="message-avatar">系</div>
+                            <div class="message-content">
+                                <div class="message-bubble">
+                                    已为您生成杭州3日游攻略，包含西湖、灵隐寺、宋城等热门景点。
+                                </div>
+                                <div class="message-time">2024-03-10 09:20</div>
+                            </div>
+                        </div>
+
+                        <div class="message">
+                            <div class="message-avatar">系</div>
+                            <div class="message-content">
+                                <div class="message-bubble">
+                                    您的旅行计划已更新，请注意查看详情。
+                                </div>
+                                <div class="message-time">2024-03-16 10:30</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <div class="input-wrapper">
+                            <div class="input-attachments">
+                                <button class="attachment-btn"><i class="fas fa-paperclip"></i></button>
+                                <button class="attachment-btn"><i class="fas fa-image"></i></button>
+                                <button class="attachment-btn"><i class="fas fa-map-marker-alt"></i></button>
+                            </div>
+                            <div class="message-input">
+                                <textarea placeholder="输入消息..."></textarea>
+                            </div>
+                            <button class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="newMessageModal" style="display: none;">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>新消息</h3>
+                <button class="modal-close" onclick="closeNewMessageModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>选择联系人</label>
+                    <select style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 14px;">
+                        <option value="">请选择联系人</option>
+                        <option value="travel-assistant">旅行助手</option>
+                        <option value="xiaoming">好友小明</option>
+                        <option value="xiaoli">旅行达人小李</option>
+                        <option value="zhangsan">张三</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>消息内容</label>
+                    <textarea style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: var(--radius); font-size: 14px; font-family: inherit; min-height: 120px; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeNewMessageModal()">取消</button>
+                <button class="btn-primary" onclick="sendNewMessage()">
+                    <i class="fas fa-paper-plane"></i> 发送
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openNewMessageModal() {
+            document.getElementById('newMessageModal').style.display = 'flex';
+        }
+
+        function closeNewMessageModal() {
+            document.getElementById('newMessageModal').style.display = 'none';
+        }
+
+        function sendNewMessage() {
+            alert('消息发送成功！');
+            closeNewMessageModal();
+        }
+
+        const chatData = {
+            '系统通知': {
+                avatar: '系',
+                status: '在线',
+                messages: [
+                    { type: 'other', text: '欢迎使用云途旅行助手！您的账户已成功创建，开始您的旅行计划吧。', time: '2024-03-10 09:00' },
+                    { type: 'own', text: '谢谢！我想了解一下杭州的旅游攻略。', time: '2024-03-10 09:15' },
+                    { type: 'other', text: '已为您生成杭州3日游攻略，包含西湖、灵隐寺、宋城等热门景点。', time: '2024-03-10 09:20' },
+                    { type: 'other', text: '您的旅行计划已更新，请注意查看详情。', time: '2024-03-16 10:30' }
+                ]
+            },
+            '旅行助手': {
+                avatar: '旅',
+                status: '在线',
+                messages: [
+                    { type: 'other', text: '您好，我是您的旅行助手，有什么可以帮您的吗？', time: '2024-03-15 10:00' },
+                    { type: 'own', text: '我想预订4月1日的酒店。', time: '2024-03-15 10:30' },
+                    { type: 'other', text: '已为您找到3家符合条件的酒店，价格从300-800元不等。', time: '2024-03-15 11:00' },
+                    { type: 'own', text: '帮我预订中间价位的那家。', time: '2024-03-15 14:00' },
+                    { type: 'other', text: '您预订的酒店已确认，入住时间为2024-04-01。', time: '2024-03-15 14:20' }
+                ]
+            },
+            '好友小明': {
+                avatar: '小',
+                status: '在线',
+                messages: [
+                    { type: 'other', text: '嘿，最近怎么样？', time: '2024-03-14 09:00' },
+                    { type: 'own', text: '挺好的，正在计划旅行。', time: '2024-03-14 09:05' },
+                    { type: 'other', text: '你好，周末一起去杭州玩吗？我有个不错的行程推荐。', time: '2024-03-14 09:15' },
+                    { type: 'own', text: '好啊，具体什么时候？', time: '2024-03-14 09:20' }
+                ]
+            },
+            '旅行达人小李': {
+                avatar: '李',
+                status: '离线',
+                messages: [
+                    { type: 'other', text: '最近去了哪里旅行？', time: '2024-03-10 15:00' },
+                    { type: 'own', text: '刚从成都回来，特别棒！', time: '2024-03-10 15:30' },
+                    { type: 'other', text: '推荐你去云南大理，风景特别美。', time: '2024-03-10 16:00' },
+                    { type: 'own', text: '好的，下次有机会去看看。', time: '2024-03-10 16:10' }
+                ]
+            },
+            '张三': {
+                avatar: '张',
+                status: '在线',
+                messages: [
+                    { type: 'other', text: '最近忙什么呢？', time: '2024-03-01 10:00' },
+                    { type: 'own', text: '在准备旅行计划。', time: '2024-03-01 10:10' },
+                    { type: 'other', text: '下次旅行一起啊', time: '2024-03-01 10:20' },
+                    { type: 'own', text: '好啊，没问题！', time: '2024-03-01 10:25' }
+                ]
+            }
+        };
+
+        function updateChat(name) {
+            const data = chatData[name];
+            if (!data) return;
+
+            // 更新聊天头部
+            document.querySelector('.chat-avatar').textContent = data.avatar;
+            document.querySelector('.chat-name').textContent = name;
+            document.querySelector('.chat-status').textContent = data.status;
+
+            // 更新聊天消息
+            const chatMessages = document.querySelector('.chat-messages');
+            chatMessages.innerHTML = '';
+
+            data.messages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${msg.type === 'own' ? 'own' : ''}`;
+                messageEl.innerHTML = `
+                    <div class="message-avatar">${msg.type === 'own' ? '我' : data.avatar}</div>
+                    <div class="message-content">
+                        <div class="message-bubble">${msg.text}</div>
+                        <div class="message-time">${msg.time}</div>
+                    </div>
+                `;
+                chatMessages.appendChild(messageEl);
+            });
+
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            const username = localStorage.getItem('username');
+            
+            if (isLoggedIn === 'true' && username) {
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('userMenu').classList.remove('hidden');
+                document.getElementById('username').textContent = username;
+            }
+
+            document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                location.reload();
+            });
+
+            document.querySelectorAll('.contact-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const contactName = this.querySelector('.contact-name').textContent;
+                    updateChat(contactName);
+                });
+            });
+
+            const textarea = document.querySelector('.message-input textarea');
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+                if (this.scrollHeight > 120) {
+                    this.style.height = '120px';
+                }
+            });
+
+            // 发送消息功能
+            document.querySelector('.send-btn').addEventListener('click', function() {
+                const messageText = textarea.value.trim();
+                if (messageText) {
+                    const currentContact = document.querySelector('.chat-name').textContent;
+                    const data = chatData[currentContact];
+                    if (data) {
+                        // 添加新消息到数据
+                        const now = new Date();
+                        const time = now.getFullYear() + '-' + 
+                                    String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                                    String(now.getDate()).padStart(2, '0') + ' ' + 
+                                    String(now.getHours()).padStart(2, '0') + ':' + 
+                                    String(now.getMinutes()).padStart(2, '0');
+                        
+                        data.messages.push({
+                            type: 'own',
+                            text: messageText,
+                            time: time
+                        });
+
+                        // 更新聊天界面
+                        updateChat(currentContact);
+
+                        // 清空输入框
+                        textarea.value = '';
+                        textarea.style.height = 'auto';
+                    }
+                }
+            });
+
+            // 按Enter键发送消息
+            textarea.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.querySelector('.send-btn').click();
+                }
+            });
+
+            document.querySelectorAll('.modal-overlay').forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+
+            // 初始加载第一个联系人的聊天
+            updateChat('系统通知');
+        });
+    </script>
+</body>
+</html>

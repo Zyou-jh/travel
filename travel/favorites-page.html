@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的喜欢 - 旅途</title>
+    <link rel="stylesheet" href="计设.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="计设.html">
+                    <i class="fas fa-plane-departure"></i>
+                    <span>旅途</span>
+                </a>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="计设.html" class="nav-link">
+                    <i class="fas fa-home"></i>
+                    <span>首页</span>
+                </a>
+                <a href="计设.html#community" class="nav-link">
+                    <i class="fas fa-users"></i>
+                    <span>社区</span>
+                </a>
+                <a href="travelog-page.html" class="nav-link">
+                    <i class="fas fa-book"></i>
+                    <span>旅行日志</span>
+                </a>
+            </div>
+            
+            <div class="nav-actions">
+                <a href="计设.html#profile" class="nav-link">
+                    <i class="fas fa-user"></i>
+                    <span>个人中心</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <div class="container">
+            <!-- 页面标题 -->
+            <div class="page-header">
+                <div class="page-title">
+                    <i class="fas fa-heart"></i>
+                    <h1>我的喜欢</h1>
+                </div>
+                <div class="page-actions">
+                    <button class="btn-secondary" id="clearAllLikes">
+                        <i class="fas fa-trash-alt"></i>
+                        清空所有
+                    </button>
+                </div>
+            </div>
+
+            <!-- 筛选标签 -->
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">
+                    <i class="fas fa-th-large"></i>
+                    全部
+                </button>
+                <button class="filter-tab" data-filter="post">
+                    <i class="fas fa-file-alt"></i>
+                    文章
+                </button>
+                <button class="filter-tab" data-filter="travelog">
+                    <i class="fas fa-book"></i>
+                    旅行日志
+                </button>
+                <button class="filter-tab" data-filter="destination">
+                    <i class="fas fa-map-marker-alt"></i>
+                    目的地
+                </button>
+            </div>
+
+            <!-- 喜欢内容列表 -->
+            <div class="favorites-container" id="favoritesContainer">
+                <!-- 动态加载内容 -->
+            </div>
+
+            <!-- 空状态 -->
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="fas fa-heart"></i>
+                <h3>还没有喜欢的文章</h3>
+                <p>去社区看看吧，发现更多精彩内容</p>
+                <a href="计设.html#community" class="btn-primary">
+                    <i class="fas fa-arrow-right"></i>
+                    前往社区
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast 通知 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // 获取所有喜欢的内容
+        function getLikedContent() {
+            const likedPosts = JSON.parse(localStorage.getItem('travel_liked_posts') || '[]');
+            const likedLogs = JSON.parse(localStorage.getItem('travel_liked_logs') || '[]');
+            return [...likedPosts, ...likedLogs];
+        }
+
+        // 渲染喜欢的内容
+        function renderFavorites(filter = 'all') {
+            const container = document.getElementById('favoritesContainer');
+            const emptyState = document.getElementById('emptyState');
+            const allLiked = getLikedContent();
+
+            // 筛选内容
+            let filteredLiked = allLiked;
+            if (filter !== 'all') {
+                filteredLiked = allLiked.filter(item => item.type === filter);
+            }
+
+            // 按点赞时间倒序排列
+            const sortedLiked = filteredLiked.sort((a, b) => new Date(b.likedAt) - new Date(a.likedAt));
+
+            // 显示/隐藏空状态
+            if (sortedLiked.length === 0) {
+                container.innerHTML = '';
+                emptyState.style.display = 'flex';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            // 渲染内容
+            container.innerHTML = sortedLiked.map(item => {
+                const typeIcon = item.type === 'travelog' ? 'fa-book' : 
+                               item.type === 'destination' ? 'fa-map-marker-alt' : 'fa-file-alt';
+                const typeText = item.type === 'travelog' ? '旅行日志' : 
+                               item.type === 'destination' ? '目的地' : '文章';
+                const location = item.location || '未知地点';
+                const author = item.author || '未知作者';
+                const content = item.content || item.title || '';
+                const displayContent = content.length > 100 ? content.substring(0, 100) + '...' : content;
+                const likedDate = new Date(item.likedAt).toLocaleDateString('zh-CN');
+
+                return `
+                    <div class="favorite-item" data-id="${item.id}" data-type="${item.type || 'post'}">
+                        <div class="favorite-icon">
+                            <i class="fas ${typeIcon}"></i>
+                        </div>
+                        <div class="favorite-content">
+                            <div class="favorite-header">
+                                <span class="favorite-type">${typeText}</span>
+                                <span class="favorite-date">${likedDate}</span>
+                            </div>
+                            <h4 class="favorite-title">${escapeHtml(displayContent)}</h4>
+                            <div class="favorite-meta">
+                                <span class="favorite-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    ${escapeHtml(location)}
+                                </span>
+                                <span class="favorite-author">
+                                    <i class="fas fa-user"></i>
+                                    ${escapeHtml(author)}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="favorite-actions">
+                            <button class="btn-icon btn-remove" title="取消喜欢" onclick="removeFavorite('${item.id}')">
+                                <i class="fas fa-heart-broken"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // HTML 转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // 取消喜欢
+        function removeFavorite(id) {
+            if (!confirm('确定要取消喜欢吗？')) return;
+
+            const likedPosts = JSON.parse(localStorage.getItem('travel_liked_posts') || '[]');
+            const likedLogs = JSON.parse(localStorage.getItem('travel_liked_logs') || '[]');
+
+            // 从文章中移除
+            const updatedPosts = likedPosts.filter(p => p.id !== id);
+            localStorage.setItem('travel_liked_posts', JSON.stringify(updatedPosts));
+
+            // 从旅行日志中移除
+            const updatedLogs = likedLogs.filter(l => l.id !== id);
+            localStorage.setItem('travel_liked_logs', JSON.stringify(updatedLogs));
+
+            // 重新渲染
+            const activeFilter = document.querySelector('.filter-tab.active').dataset.filter;
+            renderFavorites(activeFilter);
+
+            showToast('success', '已取消喜欢', '该内容已从喜欢列表中移除');
+
+            // 更新个人中心的喜欢数量
+            updateLikeCount();
+        }
+
+        // 更新喜欢数量
+        function updateLikeCount() {
+            const allLiked = getLikedContent();
+            const likeCount = allLiked.length;
+            
+            // 更新 localStorage 中的总喜欢列表
+            localStorage.setItem('travel_all_liked', JSON.stringify(allLiked));
+
+            // 如果在个人中心页面，更新喜欢数量
+            const likeStat = document.querySelector('.profile-stats .stat:nth-child(4) .stat-num');
+            if (likeStat) {
+                likeStat.textContent = likeCount;
+            }
+        }
+
+        // 清空所有喜欢
+        document.getElementById('clearAllLikes').addEventListener('click', function() {
+            const allLiked = getLikedContent();
+            if (allLiked.length === 0) {
+                showToast('warning', '提示', '喜欢列表已经是空的了');
+                return;
+            }
+
+            if (!confirm('确定要清空所有喜欢吗？此操作不可恢复。')) return;
+
+            localStorage.removeItem('travel_liked_posts');
+            localStorage.removeItem('travel_liked_logs');
+            localStorage.removeItem('travel_all_liked');
+
+            renderFavorites();
+            updateLikeCount();
+
+            showToast('success', '已清空', '所有喜欢内容已清空');
+        });
+
+        // 筛选标签切换
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 移除所有 active 类
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                // 添加 active 类到当前标签
+                this.classList.add('active');
+
+                // 重新渲染
+                const filter = this.dataset.filter;
+                renderFavorites(filter);
+            });
+        });
+
+        // Toast 通知
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: 'fa-check-circle',
+                error: 'fa-times-circle',
+                warning: 'fa-exclamation-circle',
+                info: 'fa-info-circle'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas ${icons[type] || icons.info}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                toast.classList.add('toast-hide');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // 点击关闭按钮
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.classList.add('toast-hide');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+
+        // 页面加载时渲染内容
+        document.addEventListener('DOMContentLoaded', function() {
+            renderFavorites();
+        });
+    </script>
+</body>
+</html>
